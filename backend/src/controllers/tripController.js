@@ -1,7 +1,7 @@
 const db = require("../../database/init");
 const logger = require("../utils/logger");
 
-// ============ GET ALL TRIPS ============
+// GET ALL TRIPS
 exports.getAll = (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
     const offset = parseInt(req.query.offset) || 0;
@@ -19,27 +19,22 @@ exports.getAll = (req, res) => {
     );
 };
 
-// ============ GET TRIP BY ID ============
+// GET TRIP BY ID
 exports.getById = (req, res) => {
     const { id } = req.params;
-
-    if (isNaN(id)) {
-        return res.status(400).json({ success: false, error: "Invalid trip ID" });
-    }
+    if (isNaN(id)) return res.status(400).json({ success: false, error: "Invalid ID" });
 
     db.get("SELECT * FROM trips WHERE id = ?", [id], (err, row) => {
         if (err) {
             logger.error("getById", err);
             return res.status(500).json({ success: false, error: "Database error" });
         }
-        if (!row) {
-            return res.status(404).json({ success: false, error: "Trip not found" });
-        }
+        if (!row) return res.status(404).json({ success: false, error: "Not found" });
         res.json({ success: true, data: row });
     });
 };
 
-// ============ CREATE TRIP ============
+// CREATE TRIP
 exports.create = (req, res) => {
     const { passenger, passport, driver, destination, type, fare } = req.body;
     const date = new Date().toISOString();
@@ -50,34 +45,19 @@ exports.create = (req, res) => {
         function (err) {
             if (err) {
                 logger.error("create", err);
-                return res.status(500).json({ success: false, error: "Failed to create trip" });
+                return res.status(500).json({ success: false, error: "Failed to create" });
             }
-            logger.info(`Trip created: ${passenger} → ${destination}`);
-            res.status(201).json({
-                success: true,
-                data: {
-                    id: this.lastID,
-                    passenger: passenger.trim(),
-                    passport: passport.trim(),
-                    driver: driver.trim(),
-                    destination: destination.trim(),
-                    type: type || "Local",
-                    fare: parseFloat(fare),
-                    date
-                }
-            });
+            logger.info(`Trip created: ${passenger}`);
+            res.status(201).json({ success: true, data: { id: this.lastID } });
         }
     );
 };
 
-// ============ UPDATE TRIP ============
+// UPDATE TRIP
 exports.update = (req, res) => {
     const { id } = req.params;
     const { passenger, passport, driver, destination, type, fare } = req.body;
-
-    if (isNaN(id)) {
-        return res.status(400).json({ success: false, error: "Invalid trip ID" });
-    }
+    if (isNaN(id)) return res.status(400).json({ success: false, error: "Invalid ID" });
 
     db.run(
         "UPDATE trips SET passenger = ?, passport = ?, driver = ?, destination = ?, type = ?, fare = ? WHERE id = ?",
@@ -85,53 +65,39 @@ exports.update = (req, res) => {
         function (err) {
             if (err) {
                 logger.error("update", err);
-                return res.status(500).json({ success: false, error: "Failed to update trip" });
+                return res.status(500).json({ success: false, error: "Failed to update" });
             }
-            if (this.changes === 0) {
-                return res.status(404).json({ success: false, error: "Trip not found" });
-            }
+            if (this.changes === 0) return res.status(404).json({ success: false, error: "Not found" });
             logger.info(`Trip updated: ID ${id}`);
-            res.json({ success: true, message: "Trip updated successfully" });
+            res.json({ success: true, message: "Updated" });
         }
     );
 };
 
-// ============ DELETE TRIP ============
+// DELETE TRIP
 exports.delete = (req, res) => {
     const { id } = req.params;
-
-    if (isNaN(id)) {
-        return res.status(400).json({ success: false, error: "Invalid trip ID" });
-    }
+    if (isNaN(id)) return res.status(400).json({ success: false, error: "Invalid ID" });
 
     db.run("DELETE FROM trips WHERE id = ?", [id], function (err) {
         if (err) {
             logger.error("delete", err);
-            return res.status(500).json({ success: false, error: "Failed to delete trip" });
+            return res.status(500).json({ success: false, error: "Failed to delete" });
         }
-        if (this.changes === 0) {
-            return res.status(404).json({ success: false, error: "Trip not found" });
-        }
+        if (this.changes === 0) return res.status(404).json({ success: false, error: "Not found" });
         logger.info(`Trip deleted: ID ${id}`);
-        res.json({ success: true, message: "Trip deleted successfully" });
+        res.json({ success: true, message: "Deleted" });
     });
 };
 
-// ============ SEARCH TRIPS ============
+// SEARCH TRIPS
 exports.search = (req, res) => {
     const q = req.query.q || "";
-
-    if (!q || q.length < 1) {
-        return res.json({ success: true, data: [] });
-    }
-
-    if (q.length > 100) {
-        return res.status(400).json({ success: false, error: "Search query too long" });
-    }
+    if (!q) return res.json({ success: true, data: [] });
 
     db.all(
-        "SELECT * FROM trips WHERE passenger LIKE ? OR driver LIKE ? OR destination LIKE ? OR passport LIKE ? ORDER BY id DESC LIMIT 100",
-        [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`],
+        "SELECT * FROM trips WHERE passenger LIKE ? OR driver LIKE ? OR destination LIKE ? ORDER BY id DESC LIMIT 100",
+        [`%${q}%`, `%${q}%`, `%${q}%`],
         (err, rows) => {
             if (err) {
                 logger.error("search", err);
@@ -142,7 +108,7 @@ exports.search = (req, res) => {
     );
 };
 
-// ============ GET STATISTICS ============
+// GET STATISTICS
 exports.stats = (req, res) => {
     db.get(
         "SELECT COUNT(*) as trips, SUM(fare) as earnings, AVG(fare) as average FROM trips",
@@ -164,10 +130,9 @@ exports.stats = (req, res) => {
     );
 };
 
-// ============ GET DAILY STATISTICS ============
+// DAILY STATISTICS
 exports.dailyStats = (req, res) => {
     const today = new Date().toISOString().split('T')[0];
-
     db.get(
         "SELECT COUNT(*) as trips, SUM(fare) as earnings FROM trips WHERE DATE(date) = ?",
         [today],
@@ -187,31 +152,25 @@ exports.dailyStats = (req, res) => {
     );
 };
 
-// ============ EXPORT CSV ============
+// EXPORT CSV
 exports.exportCSV = (req, res) => {
     db.all("SELECT * FROM trips ORDER BY id DESC", [], (err, rows) => {
         if (err) {
             logger.error("exportCSV", err);
             return res.status(500).json({ success: false, error: "Database error" });
         }
-
         if (!rows || rows.length === 0) {
-            return res.status(400).json({ success: false, error: "No data to export" });
+            return res.status(400).json({ success: false, error: "No data" });
         }
 
         const headers = Object.keys(rows[0]);
-        const csvContent = [
+        const csv = [
             headers.join(","),
-            ...rows.map(row =>
-                headers.map(h => {
-                    const val = row[h];
-                    return typeof val === "string" && val.includes(",") ? `"${val}"` : val;
-                }).join(",")
-            )
+            ...rows.map(r => headers.map(h => r[h]).join(","))
         ].join("\n");
 
-        res.setHeader("Content-Type", "text/csv; charset=utf-8");
-        res.setHeader("Content-Disposition", `attachment; filename=trips-${new Date().toISOString().split('T')[0]}.csv`);
-        res.send(csvContent);
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=trips.csv");
+        res.send(csv);
     });
 };

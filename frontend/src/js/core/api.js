@@ -17,7 +17,7 @@ async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
     } catch (err) {
         clearTimeout(timeoutId);
         if (err.name === "AbortError") {
-            throw new Error("Request timeout - server may be offline");
+            throw new Error("Request timeout");
         }
         throw err;
     }
