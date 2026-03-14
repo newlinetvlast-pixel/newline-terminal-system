@@ -1,21 +1,20 @@
-const express = require("express");
 const jwt = require("jsonwebtoken");
-const router = express.Router();
 
-router.post("/login", (req, res) => {
-    const { email, password } = req.body;
-    
-    // TODO: Check against database
-    if (email === "admin@terminal.com" && password === "password123") {
-        const token = jwt.sign(
-            { email, role: "admin" },
-            process.env.JWT_SECRET || "secret",
-            { expiresIn: "24h" }
-        );
-        return res.json({ success: true, token });
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({ success: false, error: "No token provided" });
     }
-    
-    res.status(401).json({ success: false, error: "Invalid credentials" });
-});
 
-module.exports = router;
+    jwt.verify(token, process.env.JWT_SECRET || "secret", (err, user) => {
+        if (err) {
+            return res.status(403).json({ success: false, error: "Invalid token" });
+        }
+        req.user = user;
+        next();
+    });
+};
+
+module.exports = authenticateToken;
