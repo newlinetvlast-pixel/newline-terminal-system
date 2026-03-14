@@ -1,18 +1,18 @@
 :root {
-    /* Better WCAG AA contrast ratios */
-    --primary: #4f46e5;        /* Darker blue (was #667eea) */
-    --secondary: #6d28d9;      /* Darker purple (was #764ba2) */
+    /* Better WCAG AA contrast */
+    --primary: #4f46e5;        /* Darker blue */
+    --secondary: #6d28d9;      /* Darker purple */
     --success: #059669;        /* Darker green */
     --danger: #dc2626;         /* Darker red */
     --warning: #ea580c;        /* Darker orange */
     --info: #0891b2;           /* Darker cyan */
-    
+
     --bg-white: #ffffff;
     --bg-light: #f8fafc;
-    --text-dark: #1e293b;      /* Darker text */
+    --text-dark: #1e293b;
     --text-grey: #64748b;
     --border: #e2e8f0;
-    
+
     --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.15);

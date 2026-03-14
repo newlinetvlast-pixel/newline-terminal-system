@@ -1,4 +1,3 @@
-// ============ INPUT SANITIZER ============
 class Sanitizer {
     static sanitizeName(name, maxLength = 50) {
         if (!name) return "";
@@ -17,8 +16,23 @@ class Sanitizer {
             .replace(/[^A-Z0-9\-]/g, "");
     }
 
+    static sanitizeDestination(dest, maxLength = 100) {
+        if (!dest) return "";
+        return String(dest)
+            .trim()
+            .slice(0, maxLength);
+    }
+
     static sanitizeNumber(num) {
         const n = parseFloat(num);
         return isNaN(n) ? 0 : n;
+    }
+
+    static isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    static isValidPhone(phone) {
+        return /^[0-9]{7,15}$/.test(phone.replace(/\D/g, ''));
     }
 }

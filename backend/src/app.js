@@ -3,12 +3,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 require("dotenv").config();
 
-const tripsRouter = require("./routes/trips");
-app.use("/api/trips", tripsRouter);
-
 const db = require("../database/init");
-const limiter = require("./middleware/rateLimit");
-app.use("/api/", limiter);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -24,17 +20,17 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 
 // ============ HEALTH CHECK ============
 app.get("/health", (req, res) => {
-    res.json({ status: "✅ Server is running", timestamp: new Date().toISOString() });
+    res.json({ 
+        status: "✅ Server running", 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV 
+    });
 });
 
 // ============ GET ALL TRIPS ============
 app.get("/api/trips", (req, res) => {
-    const limit = parseInt(req.query.limit) || 100;
+    const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
     const offset = parseInt(req.query.offset) || 0;
-
-    if (limit > 1000) {
-        return res.status(400).json({ success: false, error: "Limit cannot exceed 1000" });
-    }
 
     db.all(
         "SELECT * FROM trips ORDER BY id DESC LIMIT ? OFFSET ?",
@@ -76,19 +72,19 @@ app.post("/api/trips", (req, res) => {
     // Validation
     const errors = [];
     if (!passenger || typeof passenger !== "string" || passenger.trim().length < 2) {
-        errors.push("Passenger name is required (min 2 chars)");
+        errors.push("Passenger name required (min 2 chars)");
     }
     if (!passport || typeof passport !== "string" || passport.trim().length < 3) {
         errors.push("Valid passport required");
     }
     if (!driver || typeof driver !== "string" || driver.trim().length < 2) {
-        errors.push("Driver name is required (min 2 chars)");
+        errors.push("Driver name required (min 2 chars)");
     }
     if (!destination || typeof destination !== "string" || destination.trim().length < 2) {
-        errors.push("Destination is required (min 2 chars)");
+        errors.push("Destination required (min 2 chars)");
     }
     if (!fare || isNaN(parseFloat(fare)) || parseFloat(fare) <= 0) {
-        errors.push("Valid fare is required (> 0)");
+        errors.push("Valid fare required (> 0)");
     }
 
     if (errors.length > 0) {
@@ -130,19 +126,6 @@ app.put("/api/trips/:id", (req, res) => {
 
     if (isNaN(id)) {
         return res.status(400).json({ success: false, error: "Invalid trip ID" });
-    }
-
-    // Validation
-    const errors = [];
-    if (passenger && (typeof passenger !== "string" || passenger.trim().length < 2)) {
-        errors.push("Passenger name must be at least 2 chars");
-    }
-    if (fare && (isNaN(parseFloat(fare)) || parseFloat(fare) <= 0)) {
-        errors.push("Fare must be greater than 0");
-    }
-
-    if (errors.length > 0) {
-        return res.status(400).json({ success: false, errors });
     }
 
     db.run(
@@ -214,7 +197,7 @@ app.get("/api/search", (req, res) => {
     );
 });
 
-// ============ GET STATISTICS ============
+// ============ STATISTICS ============
 app.get("/api/stats", (req, res) => {
     db.get(
         "SELECT COUNT(*) as trips, SUM(fare) as earnings, AVG(fare) as average FROM trips",
@@ -236,7 +219,6 @@ app.get("/api/stats", (req, res) => {
     );
 });
 
-// ============ GET DAILY STATISTICS ============
 app.get("/api/stats/daily", (req, res) => {
     const today = new Date().toISOString().split('T')[0];
 
@@ -259,7 +241,7 @@ app.get("/api/stats/daily", (req, res) => {
     );
 });
 
-// ============ EXPORT TO CSV ============
+// ============ EXPORT CSV ============
 app.get("/api/export/csv", (req, res) => {
     db.all("SELECT * FROM trips ORDER BY id DESC", [], (err, rows) => {
         if (err) {
@@ -271,7 +253,6 @@ app.get("/api/export/csv", (req, res) => {
             return res.status(400).json({ success: false, error: "No data to export" });
         }
 
-        // Build CSV
         const headers = Object.keys(rows[0]);
         const csvContent = [
             headers.join(","),
@@ -303,8 +284,8 @@ app.use((err, req, res, next) => {
 // ============ START SERVER ============
 app.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
-    console.log(`📍 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔗 API base: http://localhost:${PORT}/api`);
+    console.log(`📍 Health: http://localhost:${PORT}/health`);
+    console.log(`🔗 API: http://localhost:${PORT}/api`);
 });
 
 module.exports = app;

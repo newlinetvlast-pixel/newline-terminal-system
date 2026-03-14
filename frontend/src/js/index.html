@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal Booking System</title>
+    <title>🚕 Terminal Booking System</title>
+    <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
@@ -77,6 +78,7 @@
 
     <section class="trips-section">
         <h2>📋 All Bookings</h2>
+        <div id="pagination"></div>
         <div class="table-wrapper">
             <table id="tripsTable">
                 <thead>
@@ -101,13 +103,15 @@
 </div>
 
 <!-- Scripts in correct dependency order -->
-<script src="js/helpers.js"></script>      <!-- Load first: Core utilities & API_URL -->
-<script src="js/api.js"></script>          <!-- Uses helpers.js -->
-<script src="js/offline.js"></script>      <!-- Uses helpers.js & api.js -->
-<script src="js/screener.js"></script>     <!-- Standalone scanning logic (FIXED: was scanner.js) -->
-<script src="js/printer.js"></script>      <!-- Uses helpers.js -->
-<script src="js/dashboard.js"></script>    <!-- Uses helpers.js & api.js -->
-<script src="js/app.js"></script>          <!-- Load last: Main application logic -->
+<script src="js/core/logger.js"></script>         <!-- Logging utility -->
+<script src="js/core/helpers.js"></script>       <!-- Core helpers & API_URL -->
+<script src="js/core/sanitizer.js"></script>     <!-- Input sanitizer -->
+<script src="js/core/api.js"></script>           <!-- API calls -->
+<script src="js/services/offline.js"></script>   <!-- Offline sync -->
+<script src="js/services/printer.js"></script>   <!-- Printing -->
+<script src="js/features/scanner.js"></script>   <!-- Scanning -->
+<script src="js/pagination.js"></script>         <!-- Pagination -->
+<script src="js/app.js"></script>                <!-- Main app logic -->
 
 </body>
 </html>

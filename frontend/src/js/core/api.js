@@ -1,5 +1,4 @@
 // ============ CONFIGURATION ============
-const API_URL = "http://localhost:3000/api";
 const REQUEST_TIMEOUT = 5000; // 5 seconds
 
 // ============ FETCH WITH TIMEOUT ============
@@ -32,7 +31,7 @@ async function getTrips(limit = 100, offset = 0) {
         const res = await fetchWithTimeout(`${API_URL}/trips?limit=${limit}&offset=${offset}`);
         return await res.json();
     } catch (err) {
-        console.error("❌ Error fetching trips:", err);
+        logger.error("getTrips", err);
         return { success: false, data: [] };
     }
 }
@@ -43,7 +42,7 @@ async function getTripById(id) {
         const res = await fetchWithTimeout(`${API_URL}/trips/${id}`);
         return await res.json();
     } catch (err) {
-        console.error("❌ Error fetching trip:", err);
+        logger.error("getTripById", err);
         return { success: false, data: null };
     }
 }
@@ -58,7 +57,7 @@ async function addTrip(trip) {
         });
         return await res.json();
     } catch (err) {
-        console.error("❌ Error adding trip:", err);
+        logger.error("addTrip", err);
         return { success: false, error: err.message };
     }
 }
@@ -73,7 +72,7 @@ async function updateTrip(id, data) {
         });
         return await res.json();
     } catch (err) {
-        console.error("❌ Error updating trip:", err);
+        logger.error("updateTrip", err);
         return { success: false, error: err.message };
     }
 }
@@ -86,7 +85,7 @@ async function deleteTrip(id) {
         });
         return await res.json();
     } catch (err) {
-        console.error("❌ Error deleting trip:", err);
+        logger.error("deleteTrip", err);
         return { success: false, error: err.message };
     }
 }
@@ -97,7 +96,7 @@ async function searchTrips(query) {
         const res = await fetchWithTimeout(`${API_URL}/search?q=${encodeURIComponent(query)}`);
         return await res.json();
     } catch (err) {
-        console.error("❌ Error searching trips:", err);
+        logger.error("searchTrips", err);
         return { success: false, data: [] };
     }
 }
@@ -108,18 +107,17 @@ async function getStats() {
         const res = await fetchWithTimeout(`${API_URL}/stats`);
         return await res.json();
     } catch (err) {
-        console.error("❌ Error fetching stats:", err);
+        logger.error("getStats", err);
         return { success: false, data: { trips: 0, earnings: 0, average: 0 } };
     }
 }
 
-// ============ GET DAILY STATISTICS ============
 async function getDailyStats() {
     try {
         const res = await fetchWithTimeout(`${API_URL}/stats/daily`);
         return await res.json();
     } catch (err) {
-        console.error("❌ Error fetching daily stats:", err);
+        logger.error("getDailyStats", err);
         return { success: false, data: { trips: 0, earnings: 0 } };
     }
 }
@@ -129,7 +127,7 @@ async function exportToCSV() {
     try {
         const res = await fetchWithTimeout(`${API_URL}/export/csv`);
         const blob = await res.blob();
-        
+
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -138,10 +136,10 @@ async function exportToCSV() {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        
+
         showNotification("✅ Exported to CSV", "success");
     } catch (err) {
-        console.error("❌ Error exporting:", err);
+        logger.error("exportToCSV", err);
         showNotification("❌ Export failed", "error");
     }
 }

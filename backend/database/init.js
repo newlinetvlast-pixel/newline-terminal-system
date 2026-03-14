@@ -3,7 +3,6 @@ const path = require("path");
 
 const db_name = path.join(__dirname, "terminal.db");
 
-// Enable foreign keys
 const db = new sqlite3.Database(db_name, (err) => {
     if (err) {
         console.error("❌ Database connection error:", err.message);
@@ -13,25 +12,25 @@ const db = new sqlite3.Database(db_name, (err) => {
     }
 });
 
-// Enable foreign keys
 db.run("PRAGMA foreign_keys = ON");
 
 // ============ CREATE TABLES ============
-const sql_create = `
+const createTripsTable = `
     CREATE TABLE IF NOT EXISTS trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        passenger TEXT NOT NULL,      // ✅ Required
-        passport TEXT NOT NULL,       // ✅ Required
-        driver TEXT NOT NULL,         // ✅ Required
-        destination TEXT NOT NULL,    // ✅ Required
-        type TEXT DEFAULT 'Local',    // ✅ Default value
-        fare REAL NOT NULL,           // ✅ Correct type
+        passenger TEXT NOT NULL,
+        passport TEXT NOT NULL,
+        driver TEXT NOT NULL,
+        destination TEXT NOT NULL,
+        type TEXT DEFAULT 'Local',
+        fare REAL NOT NULL,
         status TEXT DEFAULT 'completed',
         date TEXT DEFAULT CURRENT_TIMESTAMP,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 `;
+
 db.run(createTripsTable, (err) => {
     if (err) {
         console.error("❌ Table creation error:", err.message);
@@ -41,22 +40,18 @@ db.run(createTripsTable, (err) => {
     }
 });
 
-// ============ CREATE INDEXES FOR PERFORMANCE ============
+// ============ CREATE INDEXES ============
 function createIndexes() {
     const indexes = [
-CREATE INDEX IF NOT EXISTS idx_passenger ON trips(passenger);
-CREATE INDEX IF NOT EXISTS idx_date ON trips(date);
-CREATE INDEX IF NOT EXISTS idx_driver ON trips(driver);
-CREATE INDEX IF NOT EXISTS idx_destination ON trips(destination);   
+        "CREATE INDEX IF NOT EXISTS idx_passenger ON trips(passenger);",
+        "CREATE INDEX IF NOT EXISTS idx_date ON trips(date);",
+        "CREATE INDEX IF NOT EXISTS idx_driver ON trips(driver);",
+        "CREATE INDEX IF NOT EXISTS idx_destination ON trips(destination);"
     ];
 
     indexes.forEach((index, idx) => {
         db.run(index, (err) => {
-            if (err) {
-                console.error(`❌ Index ${idx} error:`, err.message);
-            } else {
-                console.log(`✅ Index ${idx} created`);
-            }
+            if (err) console.error(`❌ Index ${idx}:`, err.message);
         });
     });
 }

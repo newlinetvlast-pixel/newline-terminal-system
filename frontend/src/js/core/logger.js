@@ -1,8 +1,13 @@
-// ============ SIMPLE LOGGER ============
 class Logger {
     log(level, message, data = null) {
         const timestamp = new Date().toISOString();
-        console.log(`[${timestamp}] [${level}] ${message}`, data || "");
+        const logMsg = `[${timestamp}] [${level}] ${message}`;
+        
+        if (data) {
+            console.log(logMsg, data);
+        } else {
+            console.log(logMsg);
+        }
     }
 
     info(msg, data) { this.log("INFO", msg, data); }
