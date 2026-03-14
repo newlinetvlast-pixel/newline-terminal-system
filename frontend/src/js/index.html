@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Booking System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🚕 Terminal Booking System</h1>
+        <p class="subtitle">Professional Trip Management</p>
+    </header>
+
+    <div id="totalCount" class="earnings-box">
+        <h3>Today's Earnings: <strong>0 KD</strong></h3>
+        <p>0 trips completed</p>
+    </div>
+
+    <section class="form-section">
+        <h2>📝 New Trip Booking</h2>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="passenger">Passenger Name *</label>
+                <input id="passenger" type="text" placeholder="Full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="passport">Passport Number *</label>
+                <div class="input-with-button">
+                    <input id="passport" type="text" placeholder="Passport ID" required>
+                    <button type="button" id="scanBtn" class="btn-icon">📱 Scan</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="driver">Driver Name *</label>
+                <input id="driver" type="text" placeholder="Driver name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="destination">Destination *</label>
+                <input id="destination" type="text" placeholder="Where to?" required>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Trip Type *</label>
+                <select id="type" required>
+                    <option value="Local">Local</option>
+                    <option value="City Taxi">City Taxi</option>
+                    <option value="Bus">Bus</option>
+                    <option value="Long-Distance">Long-Distance</option>
+                    <option value="VIP">VIP</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fare">Fare (KD) *</label>
+                <input id="fare" type="number" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="saveTrip()">💾 Save Trip</button>
+            <button class="btn btn-secondary" type="button" onclick="clearForm()">🔄 Clear</button>
+        </div>
+    </section>
+
+    <section class="search-section">
+        <h2>🔍 Search Trips</h2>
+        <input type="text" id="searchInput" placeholder="Search by passenger name..." class="search-box">
+    </section>
+
+    <section class="trips-section">
+        <h2>📋 All Bookings</h2>
+        <div class="table-wrapper">
+            <table id="tripsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Passenger</th>
+                        <th>Passport</th>
+                        <th>Driver</th>
+                        <th>Destination</th>
+                        <th>Type</th>
+                        <th>Fare</th>
+                        <th>Date/Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tripsBody"></tbody>
+            </table>
+        </div>
+        <div id="noTrips" class="no-data">📭 No trips yet</div>
+    </section>
+
+</div>
+
+<!-- Scripts in correct dependency order -->
+<script src="js/helpers.js"></script>      <!-- Load first: Core utilities & API_URL -->
+<script src="js/api.js"></script>          <!-- Uses helpers.js -->
+<script src="js/offline.js"></script>      <!-- Uses helpers.js & api.js -->
+<script src="js/screener.js"></script>     <!-- Standalone scanning logic (FIXED: was scanner.js) -->
+<script src="js/printer.js"></script>      <!-- Uses helpers.js -->
+<script src="js/dashboard.js"></script>    <!-- Uses helpers.js & api.js -->
+<script src="js/app.js"></script>          <!-- Load last: Main application logic -->
+
+</body>
+</html>

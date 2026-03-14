@@ -1,0 +1,215 @@
+/* Tablets: 1024px and below */
+@media screen and (max-width: 1023px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+/* Mobile: 768px and below */
+@media screen and (max-width: 767px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+
+    h1 {
+        font-size: 1.6em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    .earnings-box {
+        padding: 15px;
+    }
+
+    .earnings-box h3 {
+        font-size: 1.2em;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    input,
+    select {
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 15px;
+    }
+
+    .search-box {
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    /* TABLE STACKING */
+    table,
+    thead,
+    tbody,
+    tr,
+    th,
+    td {
+        display: block;
+        width: 100%;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+    }
+
+    td {
+        display: grid;
+        grid-template-columns: 35% 65%;
+        gap: 10px;
+        padding: 10px;
+        border: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    td:first-child {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        font-weight: 700;
+        border-radius: 0;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        font-size: 0.8em;
+    }
+
+    td:first-child::before {
+        display: none;
+    }
+}
+
+/* Small Mobile: 576px and below */
+@media screen and (max-width: 575px) {
+    body {
+        padding: 5px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.3em;
+    }
+
+    h2 {
+        font-size: 1.1em;
+    }
+
+    input,
+    select {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+
+    td {
+        padding: 8px;
+    }
+
+    .btn-danger,
+    .btn-info {
+        padding: 4px 6px;
+        font-size: 0.7em;
+    }
+}
+
+/* Landscape */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.4em;
+        margin-bottom: 5px;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-white: #1a1a2e;
+        --bg-light: #16213e;
+        --text-dark: #ecf0f1;
+        --text-grey: #bdc3c7;
+        --border: #334d66;
+    }
+}
+
+/* Print */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .container {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .form-section,
+    .search-section,
+    .button-group {
+        display: none;
+    }
+
+    table {
+        page-break-inside: avoid;
+    }
+}
