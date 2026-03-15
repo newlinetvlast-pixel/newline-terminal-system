@@ -1,4 +1,4 @@
-﻿class Logger {
+class Logger {
     info(msg) { 
         console.log("[INFO] " + msg); 
     }

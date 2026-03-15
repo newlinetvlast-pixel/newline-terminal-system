@@ -1,146 +1,47 @@
-$apiContent = @'
-const REQUEST_TIMEOUT = 5000;
+async function loadTrips() {
+    const result = await getTrips();
+    const tbody = document.getElementById("tripsBody");
+    const noTrips = document.getElementById("noTrips");
+    if (!result.success || result.data.length === 0) {
+        tbody.innerHTML = "";
+        noTrips.style.display = "block";
+        return;
+    }
+    noTrips.style.display = "none";
+    tbody.innerHTML = result.data.map(trip => `
+        <tr>
+            <td>${trip.id}</td>
+            <td>${escapeHtml(trip.passenger)}</td>
+            <td>${escapeHtml(trip.passport)}</td>
+            <td>${escapeHtml(trip.driver)}</td>
+            <td>${escapeHtml(trip.destination)}</td>
+            <td>${escapeHtml(trip.type)}</td>
+            <td>${formatCurrency(trip.fare)}</td>
+            <td>${formatDateTime(trip.date)}</td>
+            <td><button onclick="deleteTripById(${trip.id})" style="background:#dc2626;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;">Delete</button></td>
+        </tr>
+    `).join("");
+}
 
-async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    try {
-        const response = await fetch(url, { ...options, signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: response.statusText }));
-            throw new Error(error.error || error.errors?.[0] || response.statusText);
-        }
-
-        return response;
-    } catch (err) {
-        clearTimeout(timeoutId);
-        if (err.name === "AbortError") throw new Error("Request timeout");
-        throw err;
+async function loadStats() {
+    const result = await getDailyStats();
+    const box = document.getElementById("totalCount");
+    if (result.success) {
+        box.innerHTML = `<h3>Today Earnings: <strong>${formatCurrency(result.data.earnings)}</strong></h3><p>${result.data.trips} trips completed</p>`;
     }
 }
 
-// GET ALL TRIPS
-async function getTrips(limit = 100, offset = 0) {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/trips?limit=${limit}&offset=${offset}`);
-        return await res.json();
-    } catch (err) {
-        logger.error("getTrips", err);
-        return { success: false, data: [] };
+async function deleteTripById(id) {
+    if (!confirm("Delete this trip?")) return;
+    const result = await deleteTrip(id);
+    if (result.success) {
+        showNotification("Trip deleted!", "success");
+        loadTrips();
+        loadStats();
+    } else {
+        showNotification("Error deleting trip!", "error");
     }
 }
 
-// GET TRIP BY ID
-async function getTripById(id) {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/trips/${id}`);
-        return await res.json();
-    } catch (err) {
-        logger.error("getTripById", err);
-        return { success: false, data: null };
-    }
-}
-
-// CREATE TRIP
-async function addTrip(trip) {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/trips`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(trip)
-        });
-        return await res.json();
-    } catch (err) {
-        logger.error("addTrip", err);
-        return { success: false, error: err.message };
-    }
-}
-
-// UPDATE TRIP
-async function updateTrip(id, data) {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/trips/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-        return await res.json();
-    } catch (err) {
-        logger.error("updateTrip", err);
-        return { success: false, error: err.message };
-    }
-}
-
-// DELETE TRIP
-async function deleteTrip(id) {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/trips/${id}`, {
-            method: "DELETE"
-        });
-        return await res.json();
-    } catch (err) {
-        logger.error("deleteTrip", err);
-        return { success: false, error: err.message };
-    }
-}
-
-// SEARCH TRIPS
-async function searchTrips(query) {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/search?q=${encodeURIComponent(query)}`);
-        return await res.json();
-    } catch (err) {
-        logger.error("searchTrips", err);
-        return { success: false, data: [] };
-    }
-}
-
-// GET STATISTICS
-async function getStats() {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/stats`);
-        return await res.json();
-    } catch (err) {
-        logger.error("getStats", err);
-        return { success: false, data: { trips: 0, earnings: 0, average: 0 } };
-    }
-}
-
-// GET DAILY STATISTICS
-async function getDailyStats() {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/stats/daily`);
-        return await res.json();
-    } catch (err) {
-        logger.error("getDailyStats", err);
-        return { success: false, data: { trips: 0, earnings: 0 } };
-    }
-}
-
-// EXPORT CSV
-async function exportToCSV() {
-    try {
-        const res = await fetchWithTimeout(`${API_URL}/export/csv`);
-        const blob = await res.blob();
-
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `trips-${new Date().toISOString().split("T")[0]}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-
-        showNotification("✅ Exported to CSV", "success");
-    } catch (err) {
-        logger.error("exportToCSV", err);
-        showNotification("❌ Export failed", "error");
-    }
-}
-'@
-
-$apiContent | Out-File -Encoding UTF8 -Force frontend/src/js/core/api.js
+loadTrips();
+loadStats();

@@ -1,5 +1,3 @@
-// API base URL
-const API_URL = "http://localhost:3000/api";
 
 // HTML Escape
 function escapeHtml(str) {
